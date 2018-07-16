@@ -1,0 +1,28 @@
+{
+  "author": "Yuki Akiyama",
+  "name": "@you21979/object-util",
+  "version": "0.0.1",
+  "private": false,
+  "dependencies": {
+  },
+  "readmeFilename": "README.md",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+  },
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/you21979/node-object-util.git"
+  },
+  "keywords": [
+    "object",
+    "util"
+  ],
+  "bugs": {
+    "url": "https://github.com/you21979/node-object-util/issues"
+  },
+  "license": "MIT"
+}
