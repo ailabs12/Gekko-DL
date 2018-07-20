@@ -43,7 +43,6 @@ var pipeline = (settings) => {
   // meta information about the events plugins can broadcast
   // and how they should hooked up to consumers.
   var subscriptions = require(dirs.gekko + 'subscriptions');
-
   // Instantiate each enabled plugin
   var loadPlugins = function(next) {
     // load all plugins
@@ -68,7 +67,7 @@ var pipeline = (settings) => {
       if(plugin.meta.emits)
         emitters[plugin.meta.slug] = plugin;
     });
-
+    
     next();
   }
 
@@ -106,11 +105,7 @@ var pipeline = (settings) => {
     // emitting plugins
     _.each(plugins, function(plugin) {
       _.each(pluginSubscriptions, function(sub) {
-
         if(_.has(plugin, sub.handler)) {
-
-          // if a plugin wants to listen
-          // to something disabled
           if(!emitters[sub.emitter]) {
             return log.warn([
               plugin.meta.name,
@@ -189,12 +184,6 @@ var pipeline = (settings) => {
 
       market
         .pipe(gekko)
-
-        // convert JS objects to JSON string
-        // .pipe(new require('stringify-stream')())
-        // output to standard out
-        // .pipe(process.stdout);
-
       market.on('end', gekko.finalize);
     }
   );
