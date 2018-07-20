@@ -9,6 +9,9 @@ var ENV = util.gekkoEnv();
 var mode = util.gekkoMode();
 var startTime = util.getStartTime();
 
+
+
+
 var talib = require(dirs.core + 'talib');
 if(talib == null) {
   log.warn('TALIB indicators could not be loaded, they will be unavailable.');
@@ -81,7 +84,10 @@ var Base = function(settings) {
     this.end = function() {};
 
   if(!this.onTrade)
-    this.onTrade = function() {};
+    this.onTrade = function(trade) {
+      //console.log(trade)
+      this.emit('gotTrade', trade)
+    };
 
   // let's run the implemented starting point
   this.init();
@@ -354,4 +360,7 @@ Base.prototype.finish = function(done) {
   this.finishCb = done;
 }
 
+this.onTrade = function(trade) {
+  console.log(trade)
+};
 module.exports = Base;

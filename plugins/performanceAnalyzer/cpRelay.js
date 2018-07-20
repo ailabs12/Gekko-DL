@@ -11,6 +11,7 @@ const cp = require(dirs.core + 'cp');
 
 const Relay = function() {}
 
+
 Relay.prototype.handleTrade = function(trade, report) {
   cp.trade(trade);
   cp.report(report);
@@ -18,6 +19,7 @@ Relay.prototype.handleTrade = function(trade, report) {
 
 Relay.prototype.handleRoundtrip = function(rt) {
   cp.roundtrip(rt);
+  //console.log(rt)
 }
 
 Relay.prototype.finalize = function(report) {

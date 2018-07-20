@@ -29,6 +29,11 @@ var subscriptions = [
     event: 'portfolioUpdate',
     handler: 'processPortfolioUpdate'
   },
+  {
+    emitter: 'performanceAnalyzer',
+    event: 'roundtrip',
+    handler: 'processRoundTrip'
+  },
 ];
 
 module.exports = subscriptions;

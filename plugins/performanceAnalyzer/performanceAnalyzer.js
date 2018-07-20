@@ -16,7 +16,8 @@ if(ENV === 'child-process')
 else
   Handler = require('./logger');
 
-const PerformanceAnalyzer = function() {
+var PerformanceAnalyzer =  function() {
+  //console.log(config)
   _.bindAll(this);
 
   this.dates = {
@@ -42,7 +43,9 @@ const PerformanceAnalyzer = function() {
     entry: false,
     exit: false
   }
+  
 }
+util.makeEventEmitter(PerformanceAnalyzer);
 
 PerformanceAnalyzer.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
@@ -96,7 +99,7 @@ PerformanceAnalyzer.prototype.logRoundtripPart = function(trade) {
       price: trade.price,
       total: trade.portfolio.currency + (trade.portfolio.asset * trade.price),
     }
-
+    
     this.handleRoundtrip();
   }
 }
@@ -126,8 +129,9 @@ PerformanceAnalyzer.prototype.handleRoundtrip = function() {
   this.roundTrips[this.roundTrip.id] = roundtrip;
 
   // this will keep resending roundtrips, that is not ideal.. what do we do about it?
+  
   this.handler.handleRoundtrip(roundtrip);
-
+  
   // we need a cache for sharpe
 
   // every time we have a new roundtrip
@@ -136,6 +140,8 @@ PerformanceAnalyzer.prototype.handleRoundtrip = function() {
     this.roundTrips.map(r => r.profit),
     perfConfig.riskFreeReturn
   );
+
+    this.emit('roundtrip', roundtrip);
 }
 
 PerformanceAnalyzer.prototype.calculateReportStatistics = function() {
@@ -181,6 +187,7 @@ PerformanceAnalyzer.prototype.finalize = function(done) {
   this.handler.finalize(report);
   done();
 }
+
 
 
 module.exports = PerformanceAnalyzer;

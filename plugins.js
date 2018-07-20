@@ -143,6 +143,7 @@ var plugins = [
     slug: 'performanceAnalyzer',
     async: false,
     modes: ['realtime', 'backtest'],
+    emits: ['roundtrip'],
     path: config => 'performanceAnalyzer/performanceAnalyzer.js',
   },
   {

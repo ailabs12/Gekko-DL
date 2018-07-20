@@ -46,10 +46,10 @@ Actor.prototype.setupTradingMethod = function() {
   log.info('\t', 'Using the strategy: ' + this.methodName);
 
   var method = require(dirs.methods + this.methodName);
-
   // bind all trading method specific functions
   // to the Consultant.
   var Consultant = require('./baseTradingMethod');
+  var Analyser = require('../performanceAnalyzer/performanceAnalyzer');
 
   _.each(method, function(fn, name) {
     Consultant.prototype[name] = fn;
@@ -60,6 +60,9 @@ Actor.prototype.setupTradingMethod = function() {
   }
 
   this.method = new Consultant(tradingSettings);
+  //this.analyser = new Analyser(tradingSettings);
+  //console.log(this.analyser);
+
   this.method
     .on('advice', this.relayAdvice);
 
@@ -68,6 +71,9 @@ Actor.prototype.setupTradingMethod = function() {
 
   this.batcher
     .on('candle', this.processCustomCandle);
+
+  // this.analyser
+  //   .on('roundtrip', this.processRoundTrip)
 }
 
 // HANDLERS
@@ -84,6 +90,11 @@ Actor.prototype.processCustomCandle = function(candle) {
 
 Actor.prototype.processTrade = function(trade) {
   this.method.processTrade(trade);
+  if(this.method.tradingAdvisor.method === "RL-learn"){
+    //this.method.ReplayMemory.LogReward(trade);
+    //this.analyser.processTrade(trade)
+    //console.log(trade);
+  }
 }
 
 // pass through shutdown handler
@@ -94,6 +105,11 @@ Actor.prototype.finish = function(done) {
 // EMITTERS
 Actor.prototype.relayAdvice = function(advice) {
   this.emit('advice', advice);
+}
+Actor.prototype.processRoundTrip = function(roundtrip) {
+  if(this.method.tradingAdvisor.method === "RL-learn"){
+    this.method.ReplayMemory.processRoundTrip(roundtrip);
+  }
 }
 
 
