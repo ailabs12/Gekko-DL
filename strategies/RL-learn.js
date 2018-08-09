@@ -1,23 +1,53 @@
+var util = require('../core/util');
 var log = require('../core/log');
 var _ = require('lodash');
-
+var ParserAll = require ('../ml/tradeParser')
+//var tradeSender = require('../ml/tradeSender')
 var ReplayMemory = require('../ml/ReplayMemory')
+const moment = require('moment')
+
+var config = util.getConfig();
+var exchange = config.watch.exchange; // get marketname
+//console.log(typeof exchange);
+var currency = config.watch.currency; // get ...
+//console.log(typeof currency);
+var asset = config.watch.asset;
+
+var ClickHouse = require('@apla/clickhouse');
+
 // Let's create our own strat
 var strat = {};
 
 const NUMBER_OF_CANDLES = 3;
 
+//tName = makeTable();   // New table name
 
 strat.init = function() {
   this.input = 'candle';
   this.currentTrend = 'hold';
   this.requiredHistory = 3;
   this.ReplayMemory = new ReplayMemory;
+  this.ParserAll = new ParserAll;
+  //this.tradeSender = new tradeSender;
   this.qReturn = [];
   this.state = []
   this.oldTrend;
   this.toUpdate = false;
   this.marketData = []
+  this.querry 
+
+  this.options = {
+    host: "172.17.4.102",
+    queryOptions: {
+      //profile: "web",
+      database: "gekkoStat",
+
+    },
+    omitFormat: false
+  };
+  this.clickHouse = new ClickHouse (this.options);
+
+
 }
 
 // What happens on every new candle?
@@ -28,6 +58,22 @@ strat.update = async function(candle) {
     if(this.marketData.push(candle) > NUMBER_OF_CANDLES){
         this.marketData.shift()
     }
+    
+    this.querry =  this.ParserAll.makeQuerry(candle, exchange, currency, asset);
+    console.log(this.querry);
+
+    this.clickHouse.query (this.querry, function (err, info) {
+        if(err){
+            console.log("did not send trades")
+            console.log(err);
+        }else{
+            console.log("trades sent");
+        }
+    })
+
+    
+    
+     //this.tradeSender.sendData(this.querry)
 }
 
 // For debugging purposes.
@@ -64,8 +110,10 @@ strat.check = async function() {
 }
 
 strat.end = async function() {
-        await this.ReplayMemory.RMBackSweep();
-        this.ReplayMemory.TeachModel();
+
+    await this.ReplayMemory.RMBackSweep();
+    //console.log('*** TeachModel ***');
+    await this.ReplayMemory.TeachModel();
         
 }   
 
@@ -102,6 +150,39 @@ function takeAction (QV){
         return "hold";
     }
 }
+
+/*
+function makeTable() {
+
+    selfRandom = function(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    this.options = {
+        host: "172.17.4.102",
+        queryOptions: {
+          //profile: "web",
+          database: "candles",
+    
+        },
+        omitFormat: false
+      };
+      this.clickHouse = new ClickHouse (this.options);
+   
+    var tableName = "candle" + selfRandom(1, 1000);
+    var createQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " AS candle001";
+    this.clickHouse.query(createQuery, function (err, info) {
+            if(err){
+                console.log("NOT CREATED. THIS TABLE IS YET")
+                console.log(err);
+            }else{
+                console.log("TABLE CREATED "+ tableName);
+        }
+        });
+    
+    return tableName; 
+} */
+
 
 
 module.exports = strat;
